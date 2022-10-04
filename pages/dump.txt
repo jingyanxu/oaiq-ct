@@ -1,0 +1,26 @@
+if False : 
+  idx = 0
+  placeholder = np.zeros (ds.pixel_array.shape)
+  if 'idx' not in st.session_state  : 
+    st.session_state ['idx'] = -1 
+  st.session_state['idx'] += 1
+  idx0  = st.session_state['idx']
+  if (idx0 >= ntotal) : 
+    st.write ('training done')
+    st.session_state ['idx'] = -1 
+  else :
+    iname  =   train_fnames[idx0]   
+    ds = dicom.dcmread ( iname , force=True )  
+    ax1[0].imshow (placeholder,cmap = plt.cm.gist_gray, vmin = 1024-200, vmax = 1024+200 )   
+    ax1[1].imshow (im, cmap = plt.cm.gist_gray, vmin = 1024-200, vmax = 1024+200 ) 
+#    plt.show (block=False)
+    st.pyplot(fig1)
+    if False :
+      vmin = (1024 - 200)
+      vmax = (1024 + 200)
+      im_scale = 1-np.clip ((im - vmin )/ (vmax - vmin), 0, 1 ) # * 255
+      st.image( im_scale, clamp = True , width = 200 )
+      st.write (np.min(im) , np.max (im))
+      idx += 1 
+#    plt.waitforbuttonpress (-1)
+

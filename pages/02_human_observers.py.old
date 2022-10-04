@@ -1,0 +1,208 @@
+
+from sys import argv, exit
+import random
+import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider
+import numpy as np
+import pandas as pd 
+import os
+import time 
+import streamlit as st
+import pydicom as dicom
+from PIL import Image
+#from streamlit_option_menu import option_menu
+from streamlit_drawable_canvas import st_canvas
+from bokeh.plotting import figure, show
+
+import os
+#import streamlit as st
+
+os.environ ['PYTHONINSPECT'] = '1'
+
+
+fpath =  r"C:\Users\jxu\OneDrive - Johns Hopkins\proposals\Taguchi-BrainPerfusion\PatientData\Patient-woPHI"
+fname = r"\p0001\CT\AUF1DY4O\WWQNSQQX"
+
+st.subheader ('Choose task')
+task_params = st.radio ( label =  'choose task', 
+                        options = ('detection w/ known location (ROC)' , 'detection w/o known location (LROC)'), 
+                        index = 0 , horizontal = False, label_visibility = "collapsed" )
+
+st.subheader ('Choose session')
+reader_params = st.radio ( label =  'choose session', 
+                        options = ('training', 'testing'), 
+                        index = 0 , horizontal = True, label_visibility = 'collapsed' )
+
+# return something so that can use st.image to display
+def im_normalize (im, vmin, vmax) : 
+  im01 = (np.clip (im, a_min = vmin, a_max = vmax)  - vmin )  / (vmax - vmin)
+  im = np.uint8  (plt.cm.gist_gray (im01 ) *255 ) 
+#    st.image (im, width = 200)
+  print (dir(im))
+#  im['width'] = 512
+#  im['height'] = 512
+#  im.save ('image.png')
+  return im
+
+# Create a canvas component
+#bg_image = st.sidebar.file_uploader("Background image:", type=["png", "jpg"])
+
+def load_canvas(im) : 
+  canvas_result = st_canvas(
+    fill_color="rgba(128, 165, 0, 0.3)",  # Fixed fill color with some opacity
+    stroke_width= 1,
+    stroke_color= '#fff',
+    background_color=   '#eee',
+#    background_image = Image.open('image.png') , 
+    background_image = Image.open("rapid_example.png") , 
+#    background_image = bg_image, 
+    update_streamlit= True , 
+    height=200,
+    width=200,
+    drawing_mode='point',
+    point_display_radius = 3,  # if drawing_mode == 'point' else 0,
+    key="canvas",
+  )
+  
+  return canvas_result
+
+
+def  gen_lesion (xloc, yloc, radius,  xmat, ymat) : 
+
+  lesion = np.where ( (xmat - xloc)**2 +( ymat - yloc)**2  <= radius**2, 1, 0)
+
+  return lesion 
+
+def dicom_image_to_RGBA(image_data):
+    rows = image_data.shape [0]
+    print (image_data.shape)
+    cols = rows
+    img = np.empty((rows,cols), dtype=np.uint32)
+    view = img.view(dtype=np.uint8).reshape((rows, cols, 4))
+    for i in range(0,rows):
+        for j in range(0,cols):
+            view[i][j][0] = image_data[ i, j]
+            view[i][j][1] = image_data[ i, j]
+            view[i][j][2] = image_data[ i, j]
+            view[i][j][3] = 255
+    return img
+
+def train_session ( train_fnames )  : 
+#  ds = dicom.dcmread (dcmfname)  
+
+  col1, col2 = st.columns (2, gap = "large")
+
+  idx, ntotal = -1 , 10 
+
+  if 'idx' not in st.session_state  : 
+    idx += 1
+    st.session_state ['idx']  = idx
+    
+  else : 
+    idx = st.session_state ['idx']  
+
+  ds = dicom.dcmread ( train_fnames[idx] , force=True )  
+  im0  = ds.pixel_array.astype (np.float64) 
+  im = im_normalize (im0 , vmin = 1024-200, vmax = 1024+200)
+  ds = dicom.dcmread ( train_fnames[idx] , force=True )  
+  label = ds.pixel_array.astype (np.float64) 
+  place_holder0 = np.zeros ( label.shape)
+  xdim = im0.shape[0]
+  xvec = np.arange (xdim) + 0.5
+  xmat, ymat = np.meshgrid (xvec, xvec) 
+
+  radius = 10
+  margin = 50 
+  #seed = int(time.time ()  )
+  seed = 12345
+  rng = np.random.default_rng (seed = seed)
+  xloc = rng.integers (0 + margin, xdim-margin, size = ntotal)
+  yloc = rng.integers (0 + margin, xdim-margin, size = ntotal)
+
+  place_holder = place_holder0
+
+  with col2 : 
+    load_next = st.button ( 'load next' ) 
+    if load_next  : 
+      idx +=  1
+      if (idx < ntotal) : 
+        st.session_state ['idx']  = idx
+      else : 
+        idx -= 1
+        st.session_state ['idx']  = idx
+
+      ds = dicom.dcmread ( train_fnames[idx] , force=True )  
+      im = im_normalize (ds.pixel_array.astype (np.float64) , vmin = 1024-200, vmax = 1024+200 )
+  with col1 : 
+    view_label = st.checkbox ('view label')
+    if view_label : 
+      place_holder =place_holder0 + gen_lesion (xloc[idx], yloc[idx], radius, xmat, ymat ) 
+    else : 
+      place_holder = place_holder0
+
+  if False : 
+    figsize = (6, 3) 
+    fig1, ax1 = plt.subplots (1,2, figsize = figsize)
+    ax1[0].axis ('equal')
+    ax1[0].axis ('off')
+    ax1[0].imshow (place_holder, cmap = plt.cm.gist_gray, vmin = 0, vmax = 1 )   
+    ax1[0].set_title ( 'label {}/{}'.format(idx, ntotal), fontsize = 8)
+
+    ax1[1].axis ('equal')
+    ax1[1].axis ('off')
+    ax1[1].imshow (im, cmap = plt.cm.gist_gray, vmin = 1024-200, vmax = 1024+200 )   
+    ax1[1].set_title ( 'trainng {}/{}'.format(idx, ntotal), fontsize = 8)
+  #  rating = Slider(ax1[1], 'confidence', 0, 100, 0)
+    st.pyplot (fig1)
+
+#  canvas_result = load_canvas (im)
+#  im_rgba = dicom_image_to_RGBA (im)  
+  p = figure ( x_range = (0,512), y_range=(0,512) ) 
+  p.image_rgba (image = [im], x = 0 , y=0, dw=512, dh =512) 
+#  show (p)
+  p = figure (title = 'blah' ) 
+  x = [1,2,3,4,5]
+  y = [6,7,8,4,5]
+  p.line (x, y)
+  st.image ( im ) 
+  rating =  st.slider ('confidence rating (0: low, 100: high)', min_value = 0.0, max_value  = 100., step = 1.  ) 
+if False : 
+  idx = 0
+  placeholder = np.zeros (ds.pixel_array.shape)
+  if 'idx' not in st.session_state  : 
+    st.session_state ['idx'] = -1 
+  st.session_state['idx'] += 1
+  idx0  = st.session_state['idx']
+  if (idx0 >= ntotal) : 
+    st.write ('training done')
+    st.session_state ['idx'] = -1 
+  else :
+    iname  =   train_fnames[idx0]   
+    ds = dicom.dcmread ( iname , force=True )  
+    ax1[0].imshow (placeholder,cmap = plt.cm.gist_gray, vmin = 1024-200, vmax = 1024+200 )   
+    ax1[1].imshow (im, cmap = plt.cm.gist_gray, vmin = 1024-200, vmax = 1024+200 ) 
+#    plt.show (block=False)
+    st.pyplot(fig1)
+    if False :
+      vmin = (1024 - 200)
+      vmax = (1024 + 200)
+      im_scale = 1-np.clip ((im - vmin )/ (vmax - vmin), 0, 1 ) # * 255
+      st.image( im_scale, clamp = True , width = 200 )
+      st.write (np.min(im) , np.max (im))
+      idx += 1 
+#    plt.waitforbuttonpress (-1)
+
+rel_path = r".\pages\images"
+train_fpath = os.getcwd () + rel_path 
+if reader_params == 'training'  : 
+
+  train_fnames = [ rel_path + '\\' + i for i in os.listdir (train_fpath) ]
+  train_session (train_fnames)
+          
+if reader_params == 'testing'  : 
+  st.write('start testing')
+  
+
+  
+#st.title ('menu options')
+
