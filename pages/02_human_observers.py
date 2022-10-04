@@ -78,8 +78,9 @@ def display_training (im3,  view_label,  ntotal) :
     contours_cyst = measure.find_contours (im3[2, :, :], 0.5 ) 
     ax1.plot (contours_cyst[0][:,1], contours_cyst[0][:, 0], color = 'r',linewidth=1)
 
-  fig1.text ( 0.4, 0.95, 'trainng {}/{}'.format(idx+1, ntotal), fontsize = 8, color = 'k')
-  fig1.text ( 0.6, 0.95, 'trainng {}/{}'.format(idx+1, ntotal), fontsize = 8, color = 'w')
+#  fig1.text ( 0.4, 0.95, 'training {}/{}'.format(idx+1, ntotal), fontsize = 8, color = (38/255,39/255,48/255))
+  fig1.text ( 0.4, 0.95, 'training {}/{}'.format(idx+1, ntotal), fontsize = 8, color = (0, 0, 0))
+  fig1.text ( 0.6, 0.95, 'training {}/{}'.format(idx+1, ntotal), fontsize = 8, color = 'w')
   ax1.autoscale_view('tight')
   fig1.patch.set_alpha (0.0)
 
@@ -140,7 +141,7 @@ def finish_training () :
   #done_training = True 
   st.session_state ['done_training'] = True #  done_training 
 
-st.write (idx+1, ntotal, st.session_state['idx']+1, (idx < ntotal), len (st.session_state['result']) )
+#st.write (idx+1, ntotal, st.session_state['idx']+1, (idx < ntotal), len (st.session_state['result']) )
 
 col1, col2, col3, col4 = st.columns ([1 ,1, 1, 1], gap = "large")
 with col1 : 
@@ -182,7 +183,7 @@ if (load_next  ) :
       if ( len_list < ntotal ) : 
         st.session_state['result'].append (np.array ( [xpos, ypos, rating]) )  
 
-st.write (idx+1, ntotal, st.session_state['idx']+1, (idx < ntotal), len (st.session_state['result']))
+#st.write (idx+1, ntotal, st.session_state['idx']+1, (idx < ntotal), len (st.session_state['result']))
 
 df_columns = ['xpos', 'ypos', 'rating'] 
 df_format_columns = ['{:.1f}', '{:.1f}', '{:.2f}'] 
