@@ -98,7 +98,7 @@ load_options = ('start over', 'finish training')
 rel_path = r"pages/images"
 train_fpath = os.getcwd () + rel_path 
 
-train_fnames = [ rel_path + '\\' + i for i in os.listdir (rel_path) ]
+train_fnames = [ rel_path + '/' + i for i in os.listdir (rel_path) ]
 im_tuple = load_im (train_fnames )
 #train_fnames =  os.listdir (rel_path ) 
 ntotal = len (train_fnames) 
