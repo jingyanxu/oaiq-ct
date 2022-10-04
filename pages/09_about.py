@@ -23,8 +23,9 @@ os.environ ['PYTHONINSPECT'] = '1'
 
 
 
-rel_path = r".\pages\images_jpeg"
-imfpath = os.getcwd () + rel_path 
+rel_path = r"./pages/images_jpeg"
+#imfpath = os.getcwd () + rel_path 
+imfpath =  rel_path 
 fname = 'zenodo_summary.jpg'
 #st.text ('The images used in human observers studies are obtained from ')
 

@@ -95,7 +95,7 @@ def train_session (im_tuple, idx, ntotal )  :
 load_options = ('start over', 'finish training')  
 #done_training = False 
   
-rel_path = r".\pages\images"
+rel_path = r"pages/images"
 train_fpath = os.getcwd () + rel_path 
 
 train_fnames = [ rel_path + '\\' + i for i in os.listdir (rel_path) ]
