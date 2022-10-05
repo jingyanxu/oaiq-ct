@@ -61,5 +61,5 @@ if update :
 
 
 st.sidebar.write(f"Hello {st.session_state['user']}")
-with st.expander ('user profile') : 
-  st.write(st.session_state)
+#with st.expander ('user profile') : 
+#  st.write(st.session_state)
