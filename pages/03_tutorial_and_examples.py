@@ -49,7 +49,9 @@ def  delong_roc (samples_c1, samples_c2) :
   comp1 = np.sum ((np.sum (pos_mask, axis = 0)/n2  - auc )**2 ) /(n1  -1 )
   comp2 = np.sum ((np.sum (pos_mask, axis = 1)/n1  - auc  ) **2 ) /(n2 -1 )
   auc_std = np.sqrt (comp1/n1 + comp2/n2 )
+
   return auc , auc_std
+
 def  disp_roc (samples_c1, samples_c2) : 
   
   y_true = np.concatenate (( np.zeros_like (samples_c1), np.ones_like (samples_c2) )) 

@@ -34,7 +34,7 @@ st.text ('Your background')
 user_bg = st.multiselect (label = 'your profession', options = jobs_list, 
       default = None, label_visibility = 'collapsed')
 if (len (user_bg ) > 0 )   : 
-  st.write ('You are more than welcome to participate in our human reader studies. Your contribution is highly appreciated')  
+  st.write ('Awesome!')  
 
 
 st.text ('Years of experience in your background')
