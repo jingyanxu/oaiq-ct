@@ -51,7 +51,7 @@ with st.sidebar.expander ('rating interpretations:') :
   st.markdown (html_string, unsafe_allow_html=True)
 
 
-@st.cache
+#@st.cache
 def load_im (train_fnames) : 
   im_tuple = ()
   for iname in train_fnames : 
@@ -221,4 +221,5 @@ if reader_params == 'testing'  :
 
   
 #st.title ('menu options')
+
 
