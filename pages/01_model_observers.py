@@ -25,7 +25,7 @@ def disp_dcm ( im )  :
 
   st.pyplot(fig1)
 
-@st.cache
+#@st.cache
 def  dcm_load ( this_fobj) : 
   ds = dicom.dcmread ( this_fobj , force=True )  
   im = ds.pixel_array 
@@ -107,4 +107,5 @@ with col2 :
 
   
 #st.title ('menu options')
+
 
